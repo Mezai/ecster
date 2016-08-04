@@ -28,7 +28,7 @@ class Ecster_Http_Request
      *
      * @var string
      */
-    public $data;
+    protected $data;
 
     /**
      * Init new Ecster_Http_Request instance.

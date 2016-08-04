@@ -17,7 +17,7 @@ class Ecster_HTTP_Response
      *
      * @var Ecster_HTTP_Request
      */
-    public $request;
+    protected $request;
 
 
     /**

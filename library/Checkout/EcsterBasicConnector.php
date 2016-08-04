@@ -56,7 +56,7 @@ class EcsterBasicConnector
      */
     protected function verifyResponse(Ecster_HTTP_Response $response)
     {
-      print_r($response->request->data);
+      
         if ($response->getStatus() >= 400 && $response->getStatus() <= 599) {
             $json = json_decode($response->getData(), true);
             $payload = ($json && is_array($json)) ? $json : array();
