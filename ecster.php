@@ -1,7 +1,12 @@
 <?php
 
-class ecster extends PaymentModule
+require_once(dirname(__FILE__).'/library/EcsterCheckout.php');
+
+class Ecster extends PaymentModule
 {
+    private $html = '';
+    private $post_errors = array();
+
     public function __construct()
     {
         $this->name = 'ecster';
@@ -24,22 +29,90 @@ class ecster extends PaymentModule
         }
     }
 
+    /**
+     * Install module
+     *
+     * @return bool
+     */
     public function install()
     {
-        return parent::install &&
-            $this->registerHook('displayShoppingCart')
-            $this->registerHook('backOfficeHeader')
-            $this->registerHook('paymentReturn')
-            $this->registerHook('header');
+        return parent::install()
+            && $this->registerHook('displayShoppingCart')
+            && $this->registerHook('backOfficeHeader')
+            && $this->registerHook('paymentReturn')
+            && $this->registerHook('header');
     }
 
+    /**
+     * Uninstall module
+     *
+     * @return bool
+     */
     public function uninstall()
     {
         return parent::uninstall()
+            && $this->unregisterHook('displayShoppingCart')
+            && $this->unregisterHook('backOfficeHeader')
+            && $this->unregisterHook('paymentReturn')
+            && $this->unregisterHook('header')
             && Configuration::deleteByName('ECSTER_USERNAME')
             && Configuration::deleteByName('ECSTER_PASSWORD')
             && Configuration::deleteByName('ECSTER_MODE');
     }
+
+    /**
+     * Hook header
+     *
+     * @return void
+     */
+    public function hookHeader()
+    {
+        $this->context->controller->addJS('https://labs.ecster.se/pay/integration/ecster-pay-labs.js');
+    }
+
+    public function postValidation()
+    {
+        if (!Tools::getValue('ECSTER_USERNAME')) {
+            $this->post_errors[] = $this->l('You need to provide Ecster username');
+        }
+
+        if (!Tools::getValue('ECSTER_PASSWORD')) {
+            $this->post_errors[] = $this->l('You need to provide Ecster password');
+        } 
+    }
+    
+    public function getContent()
+    {
+        if (Tools::isSubmit('saveBtn')) {
+            $this->postValidation();
+            if (!count($this->post_errors)) {
+                $this->postProcess();
+            } else {
+                foreach ($this->post_errors as $error) {
+                    $this->html = $this->displayError($error);
+                }
+            }
+        } else {
+            $this->html .= '<br />';
+        }
+        $this->html .= $this->renderForm();
+        return $this->html;
+    }
+
+    /**
+     * Update configuration
+     *
+     * @return void
+     */
+    public function postProcess()
+    {
+        Configuration::updateValue('ECSTER_USERNAME', Tools::getValue('ECSTER_USERNAME'));
+        Configuration::updateValue('ECSTER_PASSWORD', Tools::getValue('ECSTER_PASSWORD'));
+        Configuration::updateValue('ECSTER_MODE', Tools::getValue('ECSTER_MODE'));
+
+        $this->html .= $this->displayConfirmation($this->l('Settings updated'));
+    }
+
 
     public function renderForm() {
     $fields_form = array(
@@ -116,8 +189,98 @@ class ecster extends PaymentModule
     public function hookDisplayShoppingCart()
     {
 
+        if (!$this->active) {
+            return;
+        }
 
-        return $this->display(__FILE__, 'ecstercheckout.tpl');
+        $connector = EcsterConnector::create(
+            Configuration::get('ECSTER_USERNAME'),
+            Configuration::get('ECSTER_PASSWORD'),
+            EcsterConnector::TEST_URL
+         );
+        
+        $order = new EcsterOrder($connector);
+        $cart = $this->context->cart;
+        $checkoutcart = array(); 
+        $create['locale'] = array(
+            'language' => $this->context->language->iso_code,
+            'country' => $this->context->country->iso_code
+        );
+
+        $products = $cart->getProducts();
+
+        $create['deliveryMethods'][] = array(
+
+            'id' => '1a2c681f-7d88-425a-a3f7-cda2bbfc91cd',
+            'name' => 'Hemleverans',
+            'description' => 'Leverans till ditt hem.',
+            'price' => 5900,
+            'selected' => true
+        );
+        $create['cart']['amount'] = intval($cart->getOrderTotal(true, Cart::ONLY_PRODUCTS) * 100);
+        $create['cart']['currency'] = 'SEK';
+        $create['cart']['message'] = null;
+        $create['cart']['externalReference'] = null;
+
+
+
+        $create['cart']['rows'] = array();
+        
+        foreach ($products as $product) {
+            $price = Tools::ps_round($product['price_wt'], _PS_PRICE_DISPLAY_PRECISION_);
+            $price = (int)($price * 100);
+
+            
+            $tax_rate = $product['rate'] . "%"; 
+
+            $checkoutcart[] = array(
+                'partNumber' => 'random',
+                'name' => $product['name'],
+                'description' => $product['reference'],
+                'quantity' => (int)$product['quantity'],
+                'unitPrice' => $price,
+                'unit' => 'pcs',
+                'vatCode' => $tax_rate,
+                'discount' => 0,
+
+            );
+        }
+
+        
+        foreach ($checkoutcart as $item) {
+            $create['cart']['rows'][] = $item;
+        }
+
+        $create['eCommercePlatform'] = array(
+            'reference' => '2cc5c43d-fb92-472f-828a-1a5ad703d512',
+            'info' => 'info about version'
+        );
+
+
+
+        $create['customer'] = null;
+        $create['returnInfo'] = array(
+            'ok' =>(Configuration::get('PS_SSL_ENABLED') ? 'https' : 'http').'://'.$_SERVER['HTTP_HOST'].__PS_BASE_URI__.'index.php?fc=module&module=ecster&controller=checkout' 
+        );
+        $create['notificationUrl'] = null;
+       
+        try {
+            $cartKey = $order->create($create)->getCartKey();
+            $is_ssl = Tools::usingSecureMode();
+	    $cms = new CMS((int)Configuration::get('PS_CONDITIONS_CMS_ID'), (int)$this->context->cookie->id_lang);
+	    $termsPage = $this->context->link->getCMSLink($cms, $cms->link_rewrite, $is_ssl);
+            $this->context->smarty->assign(array(
+                'cartKey' => $cartKey,
+                'termsPage' => $termsPage
+            ));
+            
+            return $this->display(__FILE__, 'ecstercheckout.tpl');
+
+        } catch (Ecster_ApiErrorException $e) {
+            var_dump($e->getMessage()); 
+        }
+
+       
     }
     public function getConfigFieldsValues()
     {
