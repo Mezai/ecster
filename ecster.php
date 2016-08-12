@@ -68,6 +68,8 @@ class Ecster extends PaymentModule
     public function hookHeader()
     {
         $this->context->controller->addJS('https://labs.ecster.se/pay/integration/ecster-pay-labs.js');
+
+        $this->context->controller->addJS($this->_path.'views/js/ecstercheckout.js');
     }
 
     public function postValidation()
@@ -209,18 +211,31 @@ class Ecster extends PaymentModule
 
         $products = $cart->getProducts();
 
-        $create['deliveryMethods'][] = array(
+        $carriers = Carrier::getCarriers($this->context->language->id, true);
 
-            'id' => '1a2c681f-7d88-425a-a3f7-cda2bbfc91cd',
-            'name' => 'Hemleverans',
-            'description' => 'Leverans till ditt hem.',
-            'price' => 5900,
-            'selected' => true
-        );
+        $default_carrier = Carrier::getDefaultCarrierSelection($carriers);
+
+        $shipping_price = $cart->getOrderTotal(true, Cart::ONLY_SHIPPING);
+        
+        foreach ($carriers as $key => $value) {
+            foreach ($value as $k => $v) {
+                if ($k == "id_carrier" && $v == (string)$default_carrier) {
+                    $create['deliveryMethods'][] = array(
+                        'id' => $value['id_carrier'],
+                        'name' => $value['name'],
+                        'description' => $value['delay'],
+                        'price' => (int)$shipping_price * 100,
+                        'selected' => true
+                    );
+                }
+            }
+        }
+
+        
         $create['cart']['amount'] = intval($cart->getOrderTotal(true, Cart::ONLY_PRODUCTS) * 100);
-        $create['cart']['currency'] = 'SEK';
+        $create['cart']['currency'] = $this->context->currency->iso_code;
         $create['cart']['message'] = null;
-        $create['cart']['externalReference'] = null;
+        $create['cart']['externalReference'] = (int)$this->context->cart->id;
 
 
 
@@ -229,10 +244,7 @@ class Ecster extends PaymentModule
         foreach ($products as $product) {
             $price = Tools::ps_round($product['price_wt'], _PS_PRICE_DISPLAY_PRECISION_);
             $price = (int)($price * 100);
-
-            
             $tax_rate = $product['rate'] . "%"; 
-
             $checkoutcart[] = array(
                 'partNumber' => 'random',
                 'name' => $product['name'],
@@ -242,7 +254,6 @@ class Ecster extends PaymentModule
                 'unit' => 'pcs',
                 'vatCode' => $tax_rate,
                 'discount' => 0,
-
             );
         }
 

@@ -1,28 +1,53 @@
-<div class="ecsterSelectPayment">
-  <div class="ecsterPaymentOption current">
-    <h3>{l s='Ecster checkout' mod='ecster'}</h3>
-      <img src="">
-  </div>
-  <div class="ecsterNormalPaymentOption">
-    <h3>{l s='Other payment options' mod='ecster'}</h3><ul></ul></div>
-</div>
+{*
+* 2007-2015 PrestaShop
+*
+* NOTICE OF LICENSE
+*
+* This source file is subject to the Academic Free License (AFL 3.0)
+* that is bundled with this package in the file LICENSE.txt.
+* It is also available through the world-wide-web at this URL:
+* http://opensource.org/licenses/afl-3.0.php
+* If you did not receive a copy of the license and are unable to
+* obtain it through the world-wide-web, please send an email
+* to license@prestashop.com so we can send you a copy immediately.
+*
+* DISCLAIMER
+*
+* Do not edit or add to this file if you wish to upgrade PrestaShop to newer
+* versions in the future. If you wish to customize PrestaShop for your
+* needs please refer to http://www.prestashop.com for more information.
+*
+*  @author PrestaShop SA <contact@prestashop.com>
+*  @copyright  2007-2015 PrestaShop SA
+*  @license    http://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+*  International Registered Trademark & Property of PrestaShop SA
+*}
 
-<div class="ecsterCheckoutCarrier" style="display: block;">
-  <h2>{l s='Delivery options' mod='ecster'}</h2>
+<div class="klarnaKcoChoosePayment">
+  <div id="klarnaPaymentsKco" class="KlarnaCheckoutPaymentOption current">
+    <h3>{l s='Klarna checkout' mod='klarnapayments'}</h3>
+      <img src="https://cdn.klarna.com/1.0/shared/image/generic/badge/sv_se/checkout/short-blue.png?width=276&amp;eid={$klarna_eid|escape:'htmlall':'UTF-8'}" alt="Klarna Checkout">
+  </div>
+  <div id="klarnaCheckoutNormalPayment" class="KlarnaCheckoutPaymentOption">
+    <h3>{l s='Other payment options' mod='klarnapayments'}</h3><ul></ul></div>
+  </div>
+
+<div class="klarnaCheckoutCarrier klarnaCheckout" style="display: block;">
+  <h2>{l s='Delivery options' mod='klarnapayments'}</h2>
   {if isset($isVirtualCart) && $isVirtualCart}
-      <p class="alert alert-warning">{l s='No carrier is needed for this order.' mod='ecster'}</p>
+      <p class="alert alert-warning">{l s='No carrier is needed for this order.' mod='klarnapayments'}</p>
     {else}
       <div class="delivery_options_address">
         {if isset($delivery_option_list)}
           {foreach $delivery_option_list as $id_address => $option_list}
             <p class="carrier_title">
               {if isset($address_collection[$id_address])}
-                {l s='Choose a shipping option for this address:' mod='ecster'} {$address_collection[$id_address]->alias|escape:'htmlall':'UTF-8'}
+                {l s='Choose a shipping option for this address:' mod='klarnapayments'} {$address_collection[$id_address]->alias|escape:'htmlall':'UTF-8'}
               {else}
-                {l s='Choose a shipping option' mod='ecster'}
+                {l s='Choose a shipping option' mod='klarnapayments'}
               {/if}
             </p>
-            <form action="{$link->getModuleLink('ecster', 'carrier')|escape:'htmlall':'UTF-8'}" method="POST">
+            <form action="{$link->getModuleLink('klarnapayments', 'carrier')|escape:'htmlall':'UTF-8'}" method="POST">
             <div class="delivery_options">
               {foreach $option_list as $key => $option}
                 <div class="delivery_option {if ($option@index % 2)}alternate_{/if}item">
@@ -30,7 +55,7 @@
                     <table class="resume table table-bordered{if !$option.unique_carrier} hide{/if}">
                       <tr>
                         <td class="delivery_option_radio" style="width:162px;">
-                          <button id="delivery_option_{$id_address|intval|escape:'htmlall':'UTF-8'}_{$option@index|escape:'htmlall':'UTF-8'}" class="btn btn-primary btn-md" type="submit" name="delivery_option[{$id_address|intval}]" data-key="{$key|escape:'htmlall':'UTF-8'}" data-id_address="{$id_address|intval}" value="{$key|escape:'htmlall':'UTF-8'}"{if isset($delivery_option[$id_address]) && $delivery_option[$id_address] == $key} checked="checked"{/if} >{l s='Select' mod='ecster'}</button>
+                          <button id="delivery_option_{$id_address|intval|escape:'htmlall':'UTF-8'}_{$option@index|escape:'htmlall':'UTF-8'}" class="btn btn-primary btn-md" type="submit" name="delivery_option[{$id_address|intval}]" data-key="{$key|escape:'htmlall':'UTF-8'}" data-id_address="{$id_address|intval}" value="{$key|escape:'htmlall':'UTF-8'}"{if isset($delivery_option[$id_address]) && $delivery_option[$id_address] == $key} checked="checked"{/if} >{l s='Select' mod='klarnapayments'}</button>
                         </td>
                         <td class="delivery_option_logo">
                           {foreach $option.carrier_list as $carrier}
@@ -48,19 +73,19 @@
                               <strong>{$carrier.instance->name|escape:'htmlall':'UTF-8'}</strong>
                             {/foreach}
                             {if isset($carrier.instance->delay[$cookie->id_lang])}
-                              <br />{l s='Delivery time:' mod='ecster'}&nbsp;{$carrier.instance->delay[$cookie->id_lang]|escape:'htmlall':'UTF-8'}
+                              <br />{l s='Delivery time:' mod='klarnapayments'}&nbsp;{$carrier.instance->delay[$cookie->id_lang]|escape:'htmlall':'UTF-8'}
                             {/if}
                           {/if}
                           {if count($option_list) > 1}
                           <br />
                             {if $option.is_best_grade}
                               {if $option.is_best_price}
-                                <span class="best_grade best_grade_price best_grade_speed">{l s='The best price and speed' mod='ecster'}</span>
+                                <span class="best_grade best_grade_price best_grade_speed">{l s='The best price and speed' mod='klarnapayments'}</span>
                               {else}
-                                <span class="best_grade best_grade_speed">{l s='The fastest' mod='ecster'}</span>
+                                <span class="best_grade best_grade_speed">{l s='The fastest' mod='klarnapayments'}</span>
                               {/if}
                             {elseif $option.is_best_price}
-                              <span class="best_grade best_grade_price">{l s='The best price' mod='ecster'}</span>
+                              <span class="best_grade best_grade_price">{l s='The best price' mod='klarnapayments'}</span>
                             {/if}
                           {/if}
                         </td>
@@ -69,15 +94,15 @@
                             {if $option.total_price_with_tax && !$option.is_free && (!isset($free_shipping) || (isset($free_shipping) && !$free_shipping))}
                               {if $use_taxes == 1}
                                 {if $priceDisplay == 1}
-                                  {convertPrice price=$option.total_price_without_tax}{if $display_tax_label} {l s='(tax excl.)' mod='ecster'}{/if}
+                                  {convertPrice price=$option.total_price_without_tax}{if $display_tax_label} {l s='(tax excl.)' mod='klarnapayments'}{/if}
                                 {else}
-                                  {convertPrice price=$option.total_price_with_tax}{if $display_tax_label} {l s='(tax incl.)' mod='ecster'}{/if}
+                                  {convertPrice price=$option.total_price_with_tax}{if $display_tax_label} {l s='(tax incl.)' mod='klarnapayments'}{/if}
                                 {/if}
                               {else}
                                 {convertPrice price=$option.total_price_without_tax}
                               {/if}
                             {else}
-                              {l s='Free' mod='ecster'}
+                              {l s='Free' mod='klarnapayments'}
                             {/if}
                           </div>
                         </td>
@@ -107,9 +132,9 @@
                                 {$first.instance->delay[$cookie->id_lang]|escape:'htmlall':'UTF-8'}
                                 &nbsp;
                                 {if count($first.product_list) <= 1}
-                                  ({l s='For this product:' mod='ecster'}
+                                  ({l s='For this product:' mod='klarnapayments'}
                                 {else}
-                                  ({l s='For these products:' mod='ecster'}
+                                  ({l s='For these products:' mod='klarnapayments'}
                                 {/if}
                               {/strip}
                               {foreach $first.product_list as $product}
@@ -147,15 +172,15 @@
                               {if $option.total_price_with_tax && !$option.is_free && (!isset($free_shipping) || (isset($free_shipping) && !$free_shipping))}
                                 {if $use_taxes == 1}
                                   {if $priceDisplay == 1}
-                                    {convertPrice price=$option.total_price_without_tax}{if $display_tax_label} {l s='(tax excl.)' mod='ecster'}{/if}
+                                    {convertPrice price=$option.total_price_without_tax}{if $display_tax_label} {l s='(tax excl.)' mod='klarnapayments'}{/if}
                                   {else}
-                                    {convertPrice price=$option.total_price_with_tax}{if $display_tax_label} {l s='(tax incl.)' mod='ecster'}{/if}
+                                    {convertPrice price=$option.total_price_with_tax}{if $display_tax_label} {l s='(tax incl.)' mod='klarnapayments'}{/if}
                                   {/if}
                                 {else}
                                   {convertPrice price=$option.total_price_without_tax}
                                 {/if}
                               {else}
-                                {l s='Free' mod='ecster'}
+                                {l s='Free' mod='klarnapayments'}
                               {/if}
                             </div>
                           </td>
@@ -178,9 +203,9 @@
                                   {$carrier.instance->delay[$cookie->id_lang]|escape:'htmlall':'UTF-8'}
                                   &nbsp;
                                   {if count($first.product_list) <= 1}
-                                    ({l s='For this product:' mod='ecster'}
+                                    ({l s='For this product:' mod='klarnapayments'}
                                   {else}
-                                    ({l s='For these products:' mod='ecster'}
+                                    ({l s='For these products:' mod='klarnapayments'}
                                   {/if}
                                 {/strip}
                                 {foreach $carrier.product_list as $product}
@@ -228,46 +253,47 @@
               <p class="alert alert-warning" id="noCarrierWarning">
                 {foreach $cart->getDeliveryAddressesWithoutCarriers(true, $errors) as $address}
                   {if empty($address->alias)}
-                    {l s='No carriers available.' mod='ecster'}
+                    {l s='No carriers available.' mod='klarnapayments'}
                   {else}
                     {assign var='flag_error_message' value=false}
                     {foreach $errors as $error}
                       {if $error == Carrier::SHIPPING_WEIGHT_EXCEPTION}
                         {$flag_error_message = true}
-                        {l s='The product selection cannot be delivered by the available carrier(s): it is too heavy. Please amend your cart to lower its weight.' mod='ecster'}
+                        {l s='The product selection cannot be delivered by the available carrier(s): it is too heavy. Please amend your cart to lower its weight.' mod='klarnapayments'}
                       {elseif $error == Carrier::SHIPPING_PRICE_EXCEPTION}
                         {$flag_error_message = true}
-                        {l s='The product selection cannot be delivered by the available carrier(s). Please amend your cart.' mod='ecster'}
+                        {l s='The product selection cannot be delivered by the available carrier(s). Please amend your cart.' mod='klarnapayments'}
                       {elseif $error == Carrier::SHIPPING_SIZE_EXCEPTION}
                         {$flag_error_message = true}
-                        {l s='The product selection cannot be delivered by the available carrier(s): its size does not fit. Please amend your cart to reduce its size.' mod='ecster'}
+                        {l s='The product selection cannot be delivered by the available carrier(s): its size does not fit. Please amend your cart to reduce its size.' mod='klarnapayments'}
                       {/if}
                     {/foreach}
                     {if !$flag_error_message}
-                      {l s='No carriers available for the address "%s".' sprintf=$address->alias mod='ecster'}
+                      {l s='No carriers available for the address "%s".' sprintf=$address->alias mod='klarnapayments'}
                     {/if}
                   {/if}
                   {if !$address@last}
                     <br />
                   {/if}
                 {foreachelse}
-                  {l s='No carriers available.' mod='ecster'}
+                  {l s='No carriers available.' mod='klarnapayments'}
                 {/foreach}
               </p>
             {/foreach}
           {/if}
         {/if}
-    </div> <!-- end delivery_options_address -->
+        </div> <!-- end delivery_options_address -->
+    
+</div>      
+<div class="klarnapaymentsKCO">
+  <div class="heading">
+    <h2>{l s='Checkout express' mod='klarnapayments'}</h2>
+    <p>{l s='Finish your purchase fast, safe and frictionless' mod='klarnapayments'}</p>
+  </div>
+  <div class="snippet">
+    <div id="klarna-checkout-container" style="overflow-x: hidden;">
+      <noscript> Please &lt;a href="http://enable-javascript.com"&gt;enable JavaScript&lt;/a&gt;.</noscript>
+      {$snippet}
+    </div>
+  </div>
 </div>
-<h1>hello</h1>
-
-<script>
-	// <![CDATA[
-	var cartKey = "{$cartKey|escape:'htmlall':'UTF-8'}";
-	var termsPage ="{$termsPage|escape:'htmlall':'UTF-8'}";
-	//]]>
-	EcsterPay.start({
-    	cartKey: cartKey, // from create cart REST call
-    	shopTermsUrl: termsPage
-	});
-</script>

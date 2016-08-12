@@ -43,7 +43,15 @@ class EcsterOrder extends EcsterResource
         return $this->data['response']['key'];
     }
 
-
+    /**
+     * Get the response
+     *
+     * return string
+     */
+    public function getResponse()
+    {
+        return $this->data['response'];
+    }
 
     /**
      * Create a new order.
@@ -77,6 +85,23 @@ class EcsterOrder extends EcsterResource
         );
 
         $this->connector->apply('PUT', $this, $options);
+
+        return $this;
+    }
+    /**
+     * Fetch a order.
+     *
+     * 
+     * @return EcsterOrder
+     */
+    
+    public function fetch()
+    {
+        $options = array(
+            'url' => $this->location
+        );
+
+        $this->connector->apply('GET', $this, $options);
 
         return $this;
     }
