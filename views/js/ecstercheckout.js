@@ -35,6 +35,7 @@ $(document).ready(function() {
 			$('#center_column .opc-main-block').show();
 		} else {
 			$('#center_column .opc-main-block').hide();
+			$('#order-detail-content').hide();
 			var psPayHeaderSpan = $("h1.step-num span").filter(function() { return ($(this).text() === '3') });
 			var psPayHeader = psPayHeaderSpan.parents('h1.step-num');
 			psPayHeader.hide();

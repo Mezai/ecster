@@ -8,7 +8,9 @@ class EcsterOrder extends EcsterResource
      *
      * @var string
      */
-    protected $relativePath = '/rest/eps/v1/cart';
+    protected $createPath = '/eps/v1/cart';
+
+    protected $getPath = '/orders/v1';
 
     /**
      * contentType
@@ -21,14 +23,14 @@ class EcsterOrder extends EcsterResource
      * Init a new EcsterOrder instance.
      *
      * @param EcsterConnector $connector
-     * @param string $internalReference
+     * @param string $cartKey
      */
-    public function __construct($connector, $internalReference = null)
+    public function __construct($connector, $cartKey = null)
     {
         parent::__construct($connector);
 
-        if ($internalReference !== null) {
-            $uri = $this->connector->getDomain() . "{$this->relativePath}/{$internalReference}";
+        if ($cartKey !== null) {
+            $uri = $this->connector->getDomain() . "{$this->createPath}/{$cartKey}";
             $this->setLocation($uri);
         }
     }
@@ -62,7 +64,7 @@ class EcsterOrder extends EcsterResource
     public function create(array $data)
     {
         $options = array(
-          'url' => $this->connector->getDomain() . $this->relativePath,
+          'url' => $this->connector->getDomain() . $this->createPath,
           'data' => $data
         );
 
@@ -91,14 +93,14 @@ class EcsterOrder extends EcsterResource
     /**
      * Fetch a order.
      *
-     * 
+     * @param  $internalReference ecster order id
      * @return EcsterOrder
      */
     
-    public function fetch()
+    public function fetch($internalReference)
     {
         $options = array(
-            'url' => $this->location
+            'url' => $this->connector->getDomain() . "{$this->getPath}/{$internalReference}"
         );
 
         $this->connector->apply('GET', $this, $options);

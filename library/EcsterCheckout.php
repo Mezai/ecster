@@ -22,6 +22,6 @@ require_once ECSTER_CHECKOUT_DIR . '/HTTP/Request.php';
 require_once ECSTER_CHECKOUT_DIR . '/HTTP/Response.php';
 require_once ECSTER_CHECKOUT_DIR . '/HTTP/Transport.php';
 require_once ECSTER_CHECKOUT_DIR . '/HTTP/CurlTransport.php';
-require_once ECSTER_CHECKOUT_DIR . '/HTTP/CURLHeaders.php';
+require_once ECSTER_CHECKOUT_DIR . '/HTTP/CurlHeaders.php';
 require_once ECSTER_CHECKOUT_DIR . '/HTTP/CurlHandle.php';
 require_once ECSTER_CHECKOUT_DIR . '/HTTP/CurlFactory.php';

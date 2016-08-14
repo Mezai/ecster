@@ -117,6 +117,18 @@ class Ecster extends PaymentModule
 
 
     public function renderForm() {
+
+    $ecster_mode = array(
+        array(
+            'id_option' => 'live',
+            'name' => 'Live'
+            ),
+        array(
+            'id_option' => 'beta',
+            'name' => 'Test'
+        ),
+    );
+
     $fields_form = array(
         'form' => array(
             'legend' => array(
@@ -141,22 +153,15 @@ class Ecster extends PaymentModule
                     'required' => true
                 ),
                 array(
-                    'type' => 'switch',
-                    'label' => $this->l('Test mode'),
+                    'type' => 'select',
+                    'label' => $this->l('Live mode'),
                     'desc' => $this->l('Select test or live mode'),
                     'name' => 'ECSTER_MODE',
-                    'values' => array(
-                        array(
-                            'id' => 'active_on',
-                            'value' => 1,
-                            'label' => $this->l('Live')
-                            ),
-                        array(
-                            'id' => 'active_off',
-                            'value' => 0,
-                            'label' => $this->l('Test')
-                            )
-                        ),
+                    'options' => array(
+                        'query' => $ecster_mode,
+                        'id' => 'id_option',
+                        'name' => 'name'
+                        )
                     ),
                 ),
                 'submit' => array(
@@ -271,18 +276,20 @@ class Ecster extends PaymentModule
 
         $create['customer'] = null;
         $create['returnInfo'] = array(
-            'ok' =>(Configuration::get('PS_SSL_ENABLED') ? 'https' : 'http').'://'.$_SERVER['HTTP_HOST'].__PS_BASE_URI__.'index.php?fc=module&module=ecster&controller=checkout' 
+            'ok' => (Configuration::get('PS_SSL_ENABLED') ? 'https' : 'http').'://'.$_SERVER['HTTP_HOST'].__PS_BASE_URI__.'index.php?fc=module&module=ecster&controller=checkout' 
         );
-        $create['notificationUrl'] = null;
+        $create['notificationUrl'] = (Configuration::get('PS_SSL_ENABLED') ? 'https' : 'http').'://'.$_SERVER['HTTP_HOST'].__PS_BASE_URI__.'index.php?fc=module&module=ecster&controller=callback';
        
         try {
             $cartKey = $order->create($create)->getCartKey();
             $is_ssl = Tools::usingSecureMode();
-	    $cms = new CMS((int)Configuration::get('PS_CONDITIONS_CMS_ID'), (int)$this->context->cookie->id_lang);
-	    $termsPage = $this->context->link->getCMSLink($cms, $cms->link_rewrite, $is_ssl);
+    	    $cms = new CMS((int)Configuration::get('PS_CONDITIONS_CMS_ID'), (int)$this->context->cookie->id_lang);
+    	    $termsPage = $this->context->link->getCMSLink($cms, $cms->link_rewrite, $is_ssl);
+            $errorPage = $this->context->link->getModuleLink($this->name, 'error');
             $this->context->smarty->assign(array(
                 'cartKey' => $cartKey,
-                'termsPage' => $termsPage
+                'termsPage' => $termsPage,
+                'errorPage' => $errorPage
             ));
             
             return $this->display(__FILE__, 'ecstercheckout.tpl');
