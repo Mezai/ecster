@@ -25,8 +25,8 @@
 */
 
 require_once(dirname(__FILE__).'/library/EcsterCheckout.php');
-
-class ecster extends PaymentModule
+require_once dirname(__FILE__).'/ecster_install.php';
+class Ecster extends PaymentModule
 {
     private $html = '';
     private $post_errors = array();
@@ -60,11 +60,14 @@ class ecster extends PaymentModule
      */
     public function install()
     {
+        
+        $ecster_install = new EcsterInstall();
         return parent::install()
             && $this->registerHook('displayShoppingCart')
             && $this->registerHook('backOfficeHeader')
             && $this->registerHook('paymentReturn')
-            && $this->registerHook('header');
+            && $this->registerHook('header')
+            && $ecster_install->createTables();
     }
 
     /**
@@ -81,6 +84,7 @@ class ecster extends PaymentModule
             && $this->unregisterHook('header')
             && Configuration::deleteByName('ECSTER_USERNAME')
             && Configuration::deleteByName('ECSTER_PASSWORD')
+            && Configuration::deleteByName('ECSTER_ECPID')
             && Configuration::deleteByName('ECSTER_MODE');
     }
 
@@ -104,6 +108,10 @@ class ecster extends PaymentModule
 
         if (!Tools::getValue('ECSTER_PASSWORD')) {
             $this->post_errors[] = $this->l('You need to provide Ecster password');
+        }
+
+        if (!Tools::getValue('ECSTER_ECPID')) {
+            $this->post_errors[] = $this->l('You need to provide Ecster ECP ID');
         }
     }
     
@@ -134,6 +142,7 @@ class ecster extends PaymentModule
     {
         Configuration::updateValue('ECSTER_USERNAME', Tools::getValue('ECSTER_USERNAME'));
         Configuration::updateValue('ECSTER_PASSWORD', Tools::getValue('ECSTER_PASSWORD'));
+        Configuration::updateValue('ECSTER_ECPID', Tools::getValue('ECSTER_ECPID'));
         Configuration::updateValue('ECSTER_MODE', Tools::getValue('ECSTER_MODE'));
 
         $this->html .= $this->displayConfirmation($this->l('Settings updated'));
@@ -174,6 +183,14 @@ class ecster extends PaymentModule
                     'desc' => $this->l('Password for Ecster'),
                     'class' => 'fixed-width-xxl',
                     'name' => 'ECSTER_PASSWORD',
+                    'required' => true
+                ),
+                array(
+                    'type' => 'text',
+                    'label' => $this->l('ECP ID'),
+                    'desc' => $this->l('ECP ID from Ecster'),
+                    'class' => 'fixed-width-xxl',
+                    'name' => 'ECSTER_ECPID',
                     'required' => true
                 ),
                 array(
@@ -292,8 +309,8 @@ class ecster extends PaymentModule
         }
 
         $create['eCommercePlatform'] = array(
-            'reference' => '2cc5c43d-fb92-472f-828a-1a5ad703d512',
-            'info' => 'info about version'
+            'reference' => Configuration::get('ECSTER_ECPID'),
+            'info' => 'version 1.0.0'
         );
 
 
@@ -326,6 +343,7 @@ class ecster extends PaymentModule
         return array(
             'ECSTER_USERNAME' => Tools::getValue('ECSTER_USERNAME', Configuration::get('ECSTER_USERNAME')),
             'ECSTER_PASSWORD' => Tools::getValue('ECSTER_PASSWORD', Configuration::get('ECSTER_PASSWORD')),
+            'ECSTER_ECPID' => Tools::getValue('ECSTER_ECPID', Configuration::get('ECSTER_ECPID')),
             'ECSTER_MODE' => Tools::getValue('ECSTER_MODE', Configuration::get('ECSTER_MODE'))
             );
     }
