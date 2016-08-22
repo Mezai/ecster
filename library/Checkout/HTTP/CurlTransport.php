@@ -148,7 +148,7 @@ class Ecster_HTTP_CURLTransport
        
         $headers['Content-Type'] = $info['content_type'];
         $response = new Ecster_HTTP_Response(
-           $request, $headers, intval($info['http_code']), strval($payload)
+           $request, $headers, (int)$info['http_code'], (string)$payload
        );
         return $response;
     }

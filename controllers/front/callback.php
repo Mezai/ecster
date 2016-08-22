@@ -81,8 +81,7 @@ class EcsterCallbackModuleFrontController extends ModuleFrontController
                 $id_customer = (int)Customer::customerExists($ecster_customer['email'], true, false);
                 
                 if ($id_customer > 0) {
-                    $customer = new Customer($id_customer
-                                    );
+                    $customer = new Customer($id_customer);
                     Logger::addLog('Ecster module : creating order with existing customer id : '.$id_customer);
                 } else {
                     //Create customer

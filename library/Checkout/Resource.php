@@ -26,7 +26,7 @@ abstract class EcsterResource
 
     public function setLocation($location)
     {
-        $this->location = strval($location);
+        $this->location = (string)$location;
     }
 
     public function getContentType()

@@ -84,7 +84,7 @@ class Ecster_Http_Request
      */
     public function setHeader($name, $value)
     {
-        $this->headers[$name] = strval($value);
+        $this->headers[$name] = (string)$value;
     }
 
 

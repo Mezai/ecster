@@ -232,6 +232,7 @@ class ecster extends PaymentModule
         $order = new EcsterOrder($connector);
         $cart = $this->context->cart;
         $checkoutcart = array();
+        $create = array();
         $create['locale'] = array(
             'language' => $this->context->language->iso_code,
             'country' => $this->context->country->iso_code
