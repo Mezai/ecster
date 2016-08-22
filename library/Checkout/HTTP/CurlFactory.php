@@ -6,7 +6,7 @@ class Ecster_CurlFactory
     /**
      * Create a new cURL handle.
      *
-     * @return Ecster_CurlHandle 
+     * @return Ecster_CurlHandle
      */
     public function handle()
     {

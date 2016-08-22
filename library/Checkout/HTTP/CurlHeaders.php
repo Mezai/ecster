@@ -10,13 +10,13 @@ class Ecster_CurlHeaders
    */
   protected $headers;
 
-  public function __construct()
-  {
-    $this->headers = array();
-  }
+    public function __construct()
+    {
+        $this->headers = array();
+    }
 
 
-  public function processHeader($curl, $header)
+    public function processHeader($curl, $header)
     {
         $curl = null;
         //TODO replace with regexp, e.g. /^([^:]+):([^:]*)$/ ?
@@ -39,7 +39,6 @@ class Ecster_CurlHeaders
    */
   public function getHeaders()
   {
-    return $this->headers;
+      return $this->headers;
   }
-
 }

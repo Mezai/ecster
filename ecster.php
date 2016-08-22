@@ -2,7 +2,7 @@
 
 require_once(dirname(__FILE__).'/library/EcsterCheckout.php');
 
-class Ecster extends PaymentModule
+class ecster extends PaymentModule
 {
     private $html = '';
     private $post_errors = array();
@@ -80,7 +80,7 @@ class Ecster extends PaymentModule
 
         if (!Tools::getValue('ECSTER_PASSWORD')) {
             $this->post_errors[] = $this->l('You need to provide Ecster password');
-        } 
+        }
     }
     
     public function getContent()
@@ -116,9 +116,9 @@ class Ecster extends PaymentModule
     }
 
 
-    public function renderForm() {
-
-    $ecster_mode = array(
+    public function renderForm()
+    {
+        $ecster_mode = array(
         array(
             'id_option' => 'live',
             'name' => 'Live'
@@ -129,7 +129,7 @@ class Ecster extends PaymentModule
         ),
     );
 
-    $fields_form = array(
+        $fields_form = array(
         'form' => array(
             'legend' => array(
                 'title' => $this->l('Configure Ecster'),
@@ -195,7 +195,6 @@ class Ecster extends PaymentModule
 
     public function hookDisplayShoppingCart()
     {
-
         if (!$this->active) {
             return;
         }
@@ -208,7 +207,7 @@ class Ecster extends PaymentModule
         
         $order = new EcsterOrder($connector);
         $cart = $this->context->cart;
-        $checkoutcart = array(); 
+        $checkoutcart = array();
         $create['locale'] = array(
             'language' => $this->context->language->iso_code,
             'country' => $this->context->country->iso_code
@@ -249,7 +248,7 @@ class Ecster extends PaymentModule
         foreach ($products as $product) {
             $price = Tools::ps_round($product['price_wt'], _PS_PRICE_DISPLAY_PRECISION_);
             $price = (int)($price * 100);
-            $tax_rate = $product['rate'] . "%"; 
+            $tax_rate = $product['rate'] . "%";
             $checkoutcart[] = array(
                 'partNumber' => 'random',
                 'name' => $product['name'],
@@ -276,15 +275,15 @@ class Ecster extends PaymentModule
 
         $create['customer'] = null;
         $create['returnInfo'] = array(
-            'ok' => (Configuration::get('PS_SSL_ENABLED') ? 'https' : 'http').'://'.$_SERVER['HTTP_HOST'].__PS_BASE_URI__.'index.php?fc=module&module=ecster&controller=checkout' 
+            'ok' => (Configuration::get('PS_SSL_ENABLED') ? 'https' : 'http').'://'.$_SERVER['HTTP_HOST'].__PS_BASE_URI__.'index.php?fc=module&module=ecster&controller=checkout'
         );
         $create['notificationUrl'] = (Configuration::get('PS_SSL_ENABLED') ? 'https' : 'http').'://'.$_SERVER['HTTP_HOST'].__PS_BASE_URI__.'index.php?fc=module&module=ecster&controller=callback';
        
         try {
             $cartKey = $order->create($create)->getCartKey();
             $is_ssl = Tools::usingSecureMode();
-    	    $cms = new CMS((int)Configuration::get('PS_CONDITIONS_CMS_ID'), (int)$this->context->cookie->id_lang);
-    	    $termsPage = $this->context->link->getCMSLink($cms, $cms->link_rewrite, $is_ssl);
+            $cms = new CMS((int)Configuration::get('PS_CONDITIONS_CMS_ID'), (int)$this->context->cookie->id_lang);
+            $termsPage = $this->context->link->getCMSLink($cms, $cms->link_rewrite, $is_ssl);
             $errorPage = $this->context->link->getModuleLink($this->name, 'error');
             $this->context->smarty->assign(array(
                 'cartKey' => $cartKey,
@@ -293,20 +292,16 @@ class Ecster extends PaymentModule
             ));
             
             return $this->display(__FILE__, 'ecstercheckout.tpl');
-
         } catch (Ecster_ApiErrorException $e) {
-            var_dump($e->getMessage()); 
+            var_dump($e->getMessage());
         }
-
-       
     }
     public function getConfigFieldsValues()
     {
-return array(
+        return array(
             'ECSTER_USERNAME' => Tools::getValue('ECSTER_USERNAME', Configuration::get('ECSTER_USERNAME')),
             'ECSTER_PASSWORD' => Tools::getValue('ECSTER_PASSWORD', Configuration::get('ECSTER_PASSWORD')),
             'ECSTER_MODE' => Tools::getValue('ECSTER_MODE', Configuration::get('ECSTER_MODE'))
             );
-        
     }
 }

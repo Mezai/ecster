@@ -20,7 +20,7 @@ class Ecster_HTTP_CURLTransport
     /**
      * Timeout value in seconds.
      *
-     * @var int     
+     * @var int
      */
     protected $timeout;
 
@@ -153,7 +153,7 @@ class Ecster_HTTP_CURLTransport
         return $response;
     }
 
-    /**   
+    /**
      * Creates a HTTP request object.
      *
      * @param string $url

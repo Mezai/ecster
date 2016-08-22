@@ -1,5 +1,5 @@
 <?php
 
-class Ecster_ApiErrorException extends Ecster_Exception {
-
+class Ecster_ApiErrorException extends Ecster_Exception
+{
 }

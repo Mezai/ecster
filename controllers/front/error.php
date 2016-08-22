@@ -24,12 +24,12 @@
 *  International Registered Trademark & Property of PrestaShop SA
 */
 
-class EcsterErrorModuleFrontController extends ModuleFrontController {
-
-	public function initContent()
-	{
-		parent::initContent();
-		
-		$this->setTemplate('error.tpl');
-	}
+class EcsterErrorModuleFrontController extends ModuleFrontController
+{
+    public function initContent()
+    {
+        parent::initContent();
+        
+        $this->setTemplate('error.tpl');
+    }
 }

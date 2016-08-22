@@ -1,4 +1,5 @@
 <?php
 
-class Ecster_ConnectorErrorException extends Ecster_Exception {
+class Ecster_ConnectorErrorException extends Ecster_Exception
+{
 }

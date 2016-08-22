@@ -1,6 +1,7 @@
 <?php
 
-class Ecster_CurlHandle {
+class Ecster_CurlHandle
+{
 
     /**
      * Curl handle.
@@ -13,7 +14,7 @@ class Ecster_CurlHandle {
     /**
      * Init a new Ecster_CurlHandle instance.
      *
-     * @throws RuntimeException  
+     * @throws RuntimeException
      */
     public function __construct()
     {
@@ -33,7 +34,7 @@ class Ecster_CurlHandle {
      * @param int $name
      * @param mixed $value
      */
-    public function setOption($name, $value) 
+    public function setOption($name, $value)
     {
         curl_setopt($this->_handle, $name, $value);
     }
@@ -51,7 +52,7 @@ class Ecster_CurlHandle {
     /**
      *  Get information regarding transfer.
      *
-     * @return array 
+     * @return array
      */
     public function getInfo()
     {

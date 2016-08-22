@@ -1,7 +1,6 @@
 <?php
 
 
-class Ecster_Exception extends Exception {
-
-    
+class Ecster_Exception extends Exception
+{
 }

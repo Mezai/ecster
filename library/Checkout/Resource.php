@@ -1,9 +1,8 @@
 <?php
 
 
-abstract class EcsterResource {
-
-
+abstract class EcsterResource
+{
     protected $contentType = null;
 
     protected $accept = null;
@@ -20,7 +19,8 @@ abstract class EcsterResource {
         $this->connector = $connector;
     }
 
-    public function getLocation() {
+    public function getLocation()
+    {
         return $this->location;
     }
 
@@ -58,5 +58,4 @@ abstract class EcsterResource {
     {
         return $this->data;
     }
-
 }
