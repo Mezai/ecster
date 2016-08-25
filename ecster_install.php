@@ -25,30 +25,28 @@
 */
 
 if (!defined('_PS_VERSION_')) {
-	exit;
-}	
+    exit;
+}
 
-class EcsterInstall extends Ecster {
+class EcsterInstall extends Ecster
+{
 
-	public function __construct()
-	{
-		parent::__construct();
-	}
+    public function __construct()
+    {
+        parent::__construct();
+    }
 
-	protected function createTables()
-	{
-		if (!Db::getInstance()->Execute('
-			CREATE TABLE IF NOT EXISTS `'._DB_PREFIX_.'ecster_order` (
-			`id_ecster_order` int(10) unsigned NOT NULL,
-			`id_cart_key` varchar(255) NOT NULL,
-			PRIMARY KEY (`id_ecster_order`)
-			) ENGINE='._MYSQL_ENGINE_.' DEFAULT CHARSET=utf8'
+    protected function createTables()
+    {
+        if (!Db::getInstance()->Execute('
+            CREATE TABLE IF NOT EXISTS `'._DB_PREFIX_.'ecster_order` (
+            `id_ecster_order` int(10) unsigned NOT NULL,
+            `id_cart_key` varchar(255) NOT NULL,
+            PRIMARY KEY (`id_ecster_order`)
+            ) ENGINE='._MYSQL_ENGINE_.' DEFAULT CHARSET=utf8'
 
-		)) {
-
-			return false;
-		}
-	}
-
-
+        )) {
+            return false;
+        }
+    }
 }

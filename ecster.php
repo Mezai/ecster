@@ -25,7 +25,7 @@
 */
 
 require_once(dirname(__FILE__).'/library/EcsterCheckout.php');
-require_once dirname(__FILE__).'/ecster_install.php';
+
 class Ecster extends PaymentModule
 {
     private $html = '';
@@ -59,8 +59,9 @@ class Ecster extends PaymentModule
      * @return bool
      */
     public function install()
-    {
-        
+    {   
+
+        require_once dirname(__FILE__).'/ecster_install.php';
         $ecster_install = new EcsterInstall();
         return parent::install()
             && $this->registerHook('displayShoppingCart')
@@ -312,8 +313,6 @@ class Ecster extends PaymentModule
             'reference' => Configuration::get('ECSTER_ECPID'),
             'info' => 'version 1.0.0'
         );
-
-
 
         $create['customer'] = null;
         $create['returnInfo'] = array(
