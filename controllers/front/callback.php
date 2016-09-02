@@ -44,21 +44,9 @@ class EcsterCallbackModuleFrontController extends ModuleFrontController
             Logger::addLog('Order status notificationUrl called with internalReference : '.$internalReference);
             Logger::addLog('Order status input : '.$status);
             Logger::addLog('Cart id prestashop :'.$cartId);
-            if (Configuration::get('ECSTER_MODE') == 'live') {
-                $connector = EcsterConnector::create(
-                    Configuration::get('ECSTER_USERNAME'),
-                    Configuration::get('ECSTER_PASSWORD'),
-                    EcsterConnector::BASE_URL
-                );
-            } else {
-                $connector = EcsterConnector::create(
-                    Configuration::get('ECSTER_USERNAME'),
-                    Configuration::get('ECSTER_PASSWORD'),
-                    EcsterConnector::TEST_URL
-                );
-            }
+            
 
-            $ecster_order = new EcsterOrder($connector);
+            $ecster_order = new EcsterOrder($this->module->config);
             $callback = $ecster_order->fetch($internalReference)->getResponse();
             $cart = new Cart((int)$cartId);
             $orderId = Order::getOrderByCartId($cart->id);

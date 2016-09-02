@@ -24,21 +24,61 @@
 */
 
 $(document).ready(function() {
+
 	function init() 
 	{
 		toggleEcsterCheckout(true);
 	}
 
+	function update()
+	{
+		var currentCartKey = cartKey;
+	    var updatedCartCallback = EcsterPay.updateCart(currentCartKey);
+
+	    var settings = {
+		"async": true,
+		"crossDomain": true,
+		"url": baseDir + 'modules/ecster/ecster_ajax.php',
+		"method": "POST",
+		"dataType": "json",
+			"headers": {
+		  		"cache-control": "no-cache",
+    			"content-type": "application/x-www-form-urlencoded"
+  			},
+  			"data": {
+    			"cartKey": cartKey,
+    			"cartId": cartId
+  			}
+		};
+		$.ajax(settings).done(function(data) {
+			currentCartKey = data.cartKey;
+			updatedCartCallback(currentCartKey);
+		});
+	}
+
+	$(document).on('change', '.delivery_option_radio', function() {
+		//delay so that ps can update carrier via ajax call first.
+		setTimeout(update, 1000);
+	});
 	function toggleEcsterCheckout(show) 
 	{
+		var $deliveryMethods = $('#opc_delivery_methods');
+		var $orderDetailContents = $('#order-detail-content');
+		var $account = $('#opc_new_account');
+		var $deliveryTitle = $("h1.step-num span").filter(function() { return ($(this).text() === '2') });
+		var $payTitle = $("h1.step-num span").filter(function() { return ($(this).text() === '3') });
+		var $carrierArea = $('#carrier_area');
+		var $paymentMethods = $('#opc_payment_methods');
+		var $psPayHeaderSpan = $("h1.step-num span").filter(function() { return ($(this).text() === '3') });
+		var $psPayHeader = $psPayHeaderSpan.parents('h1.step-num');
 		if (!show) {
 			$('#center_column .opc-main-block').show();
 		} else {
-			$('#center_column .opc-main-block').hide();
-			$('#order-detail-content').hide();
-			var psPayHeaderSpan = $("h1.step-num span").filter(function() { return ($(this).text() === '3') });
-			var psPayHeader = psPayHeaderSpan.parents('h1.step-num');
-			psPayHeader.hide();
+			$deliveryMethods.insertAfter($orderDetailContents);
+			$account.hide();
+			$carrierArea.hide();
+			$paymentMethods.hide();
+			$psPayHeader.hide();
 		}
 	}
 	init();

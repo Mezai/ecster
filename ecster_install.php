@@ -47,5 +47,6 @@ class EcsterInstall extends Ecster
         )) {
                 return false;
         }
+        return true;
     }
 }

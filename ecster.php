@@ -25,12 +25,13 @@
 */
 
 require_once(dirname(__FILE__).'/library/EcsterCheckout.php');
+require_once(dirname(__FILE__).'/models/EcsterOrderModel.php');
 
 class Ecster extends PaymentModule
 {
     private $html = '';
     private $post_errors = array();
-
+    public $config;
     public function __construct()
     {
         $this->name = 'ecster';
@@ -42,6 +43,13 @@ class Ecster extends PaymentModule
         $this->bootstrap = true;
         $this->currencies = true;
         $this->currencies_mode = 'checkbox';
+
+       
+        $this->config = EcsterConnector::create(
+            Configuration::get('ECSTER_USERNAME'),
+            Configuration::get('ECSTER_PASSWORD'),
+            (Configuration::get('ECSTER_MODE') == 'live') ?EcsterConnector::BASE_URL : EcsterConnector::TEST_URL
+        );
 
         parent::__construct();
 
@@ -96,7 +104,15 @@ class Ecster extends PaymentModule
      */
     public function hookHeader()
     {
-        $this->context->controller->addJS('https://labs.ecster.se/pay/integration/ecster-pay-labs.js');
+        if (Configuration::get('ECSTER_MODE') == 'live') {
+        	$this->context->controller->addJS(
+        		'https://secure.ecster.se/pay/integration/ecster-pay.js'
+        	);
+        } else {
+        	$this->context->controller->addJS('https://labs.ecster.se/pay/integration/ecster-pay-labs.js'
+        	);
+        }
+      
 
         $this->context->controller->addJS($this->_path.'views/js/ecstercheckout.js');
     }
@@ -132,6 +148,68 @@ class Ecster extends PaymentModule
         }
         $this->html .= $this->renderForm();
         return $this->html;
+    }
+
+    public function buildOrder($cartId = null)
+    {
+        if (is_null($cartId)) {
+            $cart = $this->context->cart;
+        } else {
+            $cart = new Cart((int)$cartId);
+        }
+        $checkoutcart = array();
+        $create = array();
+        $create['locale'] = array(
+            'language' => $this->context->language->iso_code,
+            'country' => $this->context->country->iso_code
+        );
+        $products = $cart->getProducts();
+        $carrier = new Carrier($cart->id_carrier, $this->context->language->id);
+        $shippingCost = $cart->getCarrierCost($carrier->id); 
+        $create['deliveryMethods'][] = array(
+            'id' => $carrier->id_reference,
+            'name' => $carrier->name,
+            'description' => $carrier->delay,
+            'price' => (int)($shippingCost * 100),
+            'selected' => true
+        );
+        
+        $create['cart']['amount'] = (int)($cart->getOrderTotal(true, Cart::ONLY_PRODUCTS) * 100);
+        $create['cart']['currency'] = $this->context->currency->iso_code;
+        $create['cart']['message'] = null;
+        $create['cart']['externalReference'] = (int)$this->context->cart->id;
+        $create['cart']['rows'] = array();
+        
+        foreach ($products as $product) {
+            $price = Tools::ps_round($product['price_wt'], _PS_PRICE_DISPLAY_PRECISION_);
+            $price = (int)($price * 100);
+            $tax_rate = $product['rate'] . "%";
+            $checkoutcart[] = array(
+                'partNumber' => 'random',
+                'name' => $product['name'],
+                'description' => $product['reference'],
+                'quantity' => (int)$product['quantity'],
+                'unitPrice' => $price,
+                'unit' => 'pcs',
+                'vatCode' => $tax_rate,
+                'discount' => 0,
+            );
+        }
+        
+        foreach ($checkoutcart as $item) {
+            $create['cart']['rows'][] = $item;
+        }
+        $create['eCommercePlatform'] = array(
+            'reference' => Configuration::get('ECSTER_ECPID'),
+            'info' => 'version 1.0.0'
+        );
+        $create['customer'] = null;
+        $create['returnInfo'] = array(
+            'ok' => (Configuration::get('PS_SSL_ENABLED') ? 'https' : 'http').'://'.$_SERVER['HTTP_HOST'].__PS_BASE_URI__.'index.php?fc=module&module=ecster&controller=checkout'
+        );
+        $create['notificationUrl'] = (Configuration::get('PS_SSL_ENABLED') ? 'https' : 'http').'://'.$_SERVER['HTTP_HOST'].__PS_BASE_URI__.'index.php?fc=module&module=ecster&controller=callback';
+
+        return $create;
     }
 
     /**
@@ -240,88 +318,12 @@ class Ecster extends PaymentModule
         if (!$this->active) {
             return;
         }
-
-        $connector = EcsterConnector::create(
-            Configuration::get('ECSTER_USERNAME'),
-            Configuration::get('ECSTER_PASSWORD'),
-            EcsterConnector::TEST_URL
-         );
         
-        $order = new EcsterOrder($connector);
-        $cart = $this->context->cart;
-        $checkoutcart = array();
-        $create = array();
-        $create['locale'] = array(
-            'language' => $this->context->language->iso_code,
-            'country' => $this->context->country->iso_code
-        );
-
-        $products = $cart->getProducts();
-
-        $carriers = Carrier::getCarriers($this->context->language->id, true);
-
-        $default_carrier = Carrier::getDefaultCarrierSelection($carriers);
-
-        $shipping_price = $cart->getOrderTotal(true, Cart::ONLY_SHIPPING);
-        
-        foreach ($carriers as $key => $value) {
-            foreach ($value as $k => $v) {
-                if ($k == "id_carrier" && $v == (string)$default_carrier) {
-                    $create['deliveryMethods'][] = array(
-                        'id' => $value['id_carrier'],
-                        'name' => $value['name'],
-                        'description' => $value['delay'],
-                        'price' => (int)$shipping_price * 100,
-                        'selected' => true
-                    );
-                }
-            }
-        }
-
-        
-        $create['cart']['amount'] = (int)($cart->getOrderTotal(true, Cart::ONLY_PRODUCTS) * 100);
-        $create['cart']['currency'] = $this->context->currency->iso_code;
-        $create['cart']['message'] = null;
-        $create['cart']['externalReference'] = (int)$this->context->cart->id;
-
-
-
-        $create['cart']['rows'] = array();
-        
-        foreach ($products as $product) {
-            $price = Tools::ps_round($product['price_wt'], _PS_PRICE_DISPLAY_PRECISION_);
-            $price = (int)($price * 100);
-            $tax_rate = $product['rate'] . "%";
-            $checkoutcart[] = array(
-                'partNumber' => 'random',
-                'name' => $product['name'],
-                'description' => $product['reference'],
-                'quantity' => (int)$product['quantity'],
-                'unitPrice' => $price,
-                'unit' => 'pcs',
-                'vatCode' => $tax_rate,
-                'discount' => 0,
-            );
-        }
-
-        
-        foreach ($checkoutcart as $item) {
-            $create['cart']['rows'][] = $item;
-        }
-
-        $create['eCommercePlatform'] = array(
-            'reference' => Configuration::get('ECSTER_ECPID'),
-            'info' => 'version 1.0.0'
-        );
-
-        $create['customer'] = null;
-        $create['returnInfo'] = array(
-            'ok' => (Configuration::get('PS_SSL_ENABLED') ? 'https' : 'http').'://'.$_SERVER['HTTP_HOST'].__PS_BASE_URI__.'index.php?fc=module&module=ecster&controller=checkout'
-        );
-        $create['notificationUrl'] = (Configuration::get('PS_SSL_ENABLED') ? 'https' : 'http').'://'.$_SERVER['HTTP_HOST'].__PS_BASE_URI__.'index.php?fc=module&module=ecster&controller=callback';
-       
         try {
-            $cartKey = $order->create($create)->getCartKey();
+            $order = new EcsterOrder($this->config);
+       
+        	$cartKey = $order->create($this->buildOrder())->getCartKey();
+            
             $is_ssl = Tools::usingSecureMode();
             $cms = new CMS((int)Configuration::get('PS_CONDITIONS_CMS_ID'), (int)$this->context->cookie->id_lang);
             $termsPage = $this->context->link->getCMSLink($cms, $cms->link_rewrite, $is_ssl);
@@ -329,14 +331,17 @@ class Ecster extends PaymentModule
             $this->context->smarty->assign(array(
                 'cartKey' => $cartKey,
                 'termsPage' => $termsPage,
+                'cartId' => $this->context->cart->id,
                 'errorPage' => $errorPage
             ));
             
             return $this->display(__FILE__, 'ecstercheckout.tpl');
         } catch (Ecster_ApiErrorException $e) {
-            var_dump($e->getMessage());
+            $this->context->cookie->__unset('ecster_cart_key');
         }
     }
+
+
     public function getConfigFieldsValues()
     {
         return array(

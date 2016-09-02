@@ -49,14 +49,9 @@ class EcsterOrder extends EcsterResource
      * @param EcsterConnector $connector
      * @param string $cartKey
      */
-    public function __construct($connector, $cartKey = null)
+    public function __construct($connector)
     {
         parent::__construct($connector);
-
-        if ($cartKey !== null) {
-            $uri = $this->connector->getDomain() . "{$this->createPath}/{$cartKey}";
-            $this->setLocation($uri);
-        }
     }
 
     /**
@@ -103,10 +98,10 @@ class EcsterOrder extends EcsterResource
      * @param array $data
      * @return void
      */
-    public function update(array $data)
+    public function update(array $data, $cartKey)
     {
         $options = array(
-            'url' => $this->location,
+            'url' => $this->connector->getDomain() . "{$this->createPath}/{$cartKey}",
             'data' => $data
         );
 

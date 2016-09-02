@@ -28,16 +28,26 @@
 <script>
 	// <![CDATA[
 	var cartKey = "{$cartKey|escape:'htmlall':'UTF-8'}";
-	var termsPage = "{$termsPage|escape:'htmlall':'UTF-8'}";
+	var cartId = "{$cartId|escape:'htmlall':'UTF-8'}";
+    var termsPage = "{$termsPage|escape:'htmlall':'UTF-8'}";
 	var errorPage = "{$errorPage|escape:'htmlall':'UTF-8'}";
 	//]]>
 	EcsterPay.start({
     	cartKey: cartKey, // from create cart REST call
     	shopTermsUrl: termsPage,
-    	showCart: true,
+    	showCart: false,
     	showPaymentResult: true,
-    	onPaymentFailure: function () {
+        onCheckoutStartInit: function() {
+
+        },
+        onCheckoutStartSuccess: function() {
+
+        },
+    	onPaymentSuccess: function() {
+
+        },
+        onPaymentFailure: function() {
     		window.location = errorPage;
-    	}
+    	},
     });
 </script>
