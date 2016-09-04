@@ -34,10 +34,8 @@ $(document).ready(function() {
 	{
 		var currentCartKey = cartKey;
 	    var updatedCartCallback = EcsterPay.updateCart(currentCartKey);
-
 	    var settings = {
 		"async": true,
-		"crossDomain": true,
 		"url": baseDir + 'modules/ecster/ecster_ajax.php',
 		"method": "POST",
 		"dataType": "json",

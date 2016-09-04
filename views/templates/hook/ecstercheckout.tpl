@@ -32,18 +32,32 @@
     var termsPage = "{$termsPage|escape:'htmlall':'UTF-8'}";
 	var errorPage = "{$errorPage|escape:'htmlall':'UTF-8'}";
 	//]]>
+	//
+
 	EcsterPay.start({
-    	cartKey: cartKey, // from create cart REST call
+    	cartKey: cartKey,
     	shopTermsUrl: termsPage,
     	showCart: false,
     	showPaymentResult: true,
         onCheckoutStartInit: function() {
-
+        	$('.delivery_option_radio').filter('input').prop('disabled', true);
         },
         onCheckoutStartSuccess: function() {
-
+        	$('.delivery_option_radio').filter('input').prop('disabled', false);
         },
-    	onPaymentSuccess: function() {
+        onCheckoutStartFailure: function(onStartFailureData) {
+        	$('.delivery_option_radio').filter('input').prop('disabled', false);
+        },
+        onCheckoutUpdateInit: function() {
+			$('.delivery_option_radio').filter('input').prop('disabled', true);
+        },
+        onCheckoutUpdateSuccess: function() {
+        	$('.delivery_option_radio').filter('input').prop('disabled', false);
+        },
+        onCheckoutUpdateFailure: function() {
+        	$('.delivery_option_radio').filter('input').prop('disabled', false);
+        },
+        onPaymentSuccess: function() {
 
         },
         onPaymentFailure: function() {

@@ -173,7 +173,6 @@ class Ecster extends PaymentModule
             'price' => (int)($shippingCost * 100),
             'selected' => true
         );
-        
         $create['cart']['amount'] = (int)($cart->getOrderTotal(true, Cart::ONLY_PRODUCTS) * 100);
         $create['cart']['currency'] = $this->context->currency->iso_code;
         $create['cart']['message'] = null;
