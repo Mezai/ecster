@@ -90,10 +90,9 @@ class EcsterCallbackModuleFrontController extends ModuleFrontController
         $ecster_address['firstname'] = $this->splitNames($ecster_address, 'firstname');
         $ecster_address['lastname'] = $this->splitNames($ecster_address, 'lastname');
 
-        $address = $customer->getAddresses($this->ecsterCart->id_lang);
+        $addresses = $customer->getAddresses($this->ecsterCart->id_lang);
 
         foreach ($addresses as $key => $value) {
-
            if ($addresses[$key]['firstname'] === $ecster_address['firstname'] && $addresses[$key]['lastname'] === $ecster_address['lastname'] && $addresses[$key]['address1'] === $ecster_address['address'] &&
            		$addresses[$key]['city'] === $ecster_address['city'] && $addresses[$key]['postcode'] === $ecster_address['zip']) {
            		return $addresses[$key]['id_address'];
@@ -141,10 +140,12 @@ class EcsterCallbackModuleFrontController extends ModuleFrontController
                 	} else {
                 		
                 		if ($id_address = $this->checkIfAddressExists($customer, $ecster['customer'])) {
+                			Logger::addLog('id address: '.$id_address);
                 			$this->ecsterCart->id_address_delivery = $id_address;
                 			$this->ecsterCart->id_address_invoice = $id_address;
 
                 		} else {
+                			Logger::addLog('creating new address');
                 			$this->createAddress($customer, $ecster['customer'], 'invoice');
                 			$this->createAddress($customer, $ecster['customer'], 'shipping');
                 		}
