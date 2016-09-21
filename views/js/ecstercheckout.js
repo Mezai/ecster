@@ -74,7 +74,7 @@ $(document).ready(function() {
 		} else {
 			$deliveryMethods.insertAfter($orderDetailContents);
 			$account.hide();
-			$carrierArea.hide();
+			$carrierArea.detach();
 			$paymentMethods.hide();
 			$psPayHeader.hide();
 		}
