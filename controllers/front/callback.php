@@ -17,8 +17,19 @@ class EcsterCallbackModuleFrontController extends ModuleFrontController
     public $display_column_right = false;
     public $ssl =  true;
 
+    /**
+     * ecsterCart holds the Cart data.
+     * 
+     * @var object Cart
+     */
     private $ecsterCart;
-
+    
+    /**
+     * Set the state for a order.
+     *
+     * 
+     * @param string $state the state to set.
+     */
     private function setState($state)
     {
         $orderId = Order::getOrderByCartId($this->ecsterCart->id);
@@ -30,9 +41,25 @@ class EcsterCallbackModuleFrontController extends ModuleFrontController
         }
     }
 
+    /**
+     * Check if a customer exists.
+     *
+     *
+     * @param  array $ecster_customer ecster customer data from response.
+     * @return bool customer exists or not.
+     */
+
     private function customerExists(array $ecster_customer) {
     	return ($id_customer = (int)Customer::customerExists($ecster_customer['email'], true, false)) > 0 ? $id_customer : false;
     }
+
+    /**
+     * Create a customer in prestashop.
+     *
+     * 
+     * @param array $ecster_customer ecster customer data from response.
+     * @return Customer $customer the created customer.
+     */
 
     private function createCustomer(array $ecster_customer)
     {        
@@ -52,7 +79,13 @@ class EcsterCallbackModuleFrontController extends ModuleFrontController
             return $customer;
 
     }
-
+    /**
+     * Split ecster names into given name and family name.
+     * 
+     * @param  array  $ecster_customer the ecster customer data from response.
+     * @param  string $name 'firstname'|'lastname'
+     * @return string firstname or lastname.
+     */
     private function splitNames(array $ecster_customer, $name)
     {
         $names = preg_split('/[\s,]+/', $ecster_customer['name']);
@@ -63,6 +96,15 @@ class EcsterCallbackModuleFrontController extends ModuleFrontController
         return $nameArray[$name];
     }
 
+   
+    /**
+     * Create a prestashop address.
+     * 
+     * @param  Customer $customer  the associated prestashop customer object.
+     * @param  array    $ecster_address the ecster address from response.
+     * @param  string   $type whether or not to create shipping or invoice address.
+     * @return void
+     */
     private function createAddress(Customer $customer, array $ecster_address, $type)
     {
         $address = new Address();
@@ -85,6 +127,13 @@ class EcsterCallbackModuleFrontController extends ModuleFrontController
         }
     }
 
+    /**
+     * Check if a address already exists in prestashop.
+     * 
+     * @param  Customer $customer       the associated prestashop customer.
+     * @param  array    $ecster_address the ecster address given from response.
+     * @return false|int the id_address for existing addresss.
+     */
     private function checkIfAddressExists(Customer $customer, array $ecster_address)
     {
         $ecster_address['firstname'] = $this->splitNames($ecster_address, 'firstname');
@@ -101,6 +150,11 @@ class EcsterCallbackModuleFrontController extends ModuleFrontController
         return false;
     }
 
+    /**
+     * postProcess handle the incoming response from ecster.
+     *
+     * @return void
+     */
     public function postProcess()
     {
         try {
@@ -184,8 +238,9 @@ class EcsterCallbackModuleFrontController extends ModuleFrontController
                 $amount = (int)($ecsterOrder['amount']);
                 $amount = (float)($amount/100);
                 //validate order
-                $validation = $this->module->validateOrder(
-                    $this->ecsterCart->id,
+                $cart = new Cart($this->ecsterCart->id);
+                $this->module->validateOrder(
+                    $cart->id,
                     Configuration::get('PS_OS_PAYMENT'),
                     $amount,
                     $this->module->displayName,
@@ -197,14 +252,10 @@ class EcsterCallbackModuleFrontController extends ModuleFrontController
                     false,
                     $customer->secure_key
                 );
-                if ($validation) {
-                	$products = $this->ecsterCart->getProducts();
-				    foreach ($products as $product) {
-				      $this->ecsterCart->deleteProduct($product["id_product"]);
-				    }
-                	header('HTTP/1.1 200 OK', true, 200);
-                	exit;
-                }
+                
+                header('HTTP/1.1 200 OK', true, 200);
+                exit;
+
                 
             }
 
