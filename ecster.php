@@ -39,7 +39,7 @@ class Ecster extends PaymentModule
         $this->author = 'JET';
         $this->tab = 'payments_gateways';
         $this->need_instance = 1;
-        $this->module_key = '';
+        $this->module_key = '144f6fa1123a4737b60d241054eedf31';
         $this->bootstrap = true;
         $this->currencies = true;
         $this->currencies_mode = 'checkbox';
@@ -68,15 +68,11 @@ class Ecster extends PaymentModule
      */
     public function install()
     {   
-
-        require_once dirname(__FILE__).'/ecster_install.php';
-        $ecster_install = new EcsterInstall();
         return parent::install()
             && $this->registerHook('displayShoppingCart')
             && $this->registerHook('backOfficeHeader')
             && $this->registerHook('paymentReturn')
-            && $this->registerHook('header')
-            && $ecster_install->createTables();
+            && $this->registerHook('header');
     }
 
     /**
