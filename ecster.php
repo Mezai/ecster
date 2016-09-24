@@ -117,7 +117,13 @@ class Ecster extends PaymentModule
         $this->context->controller->addJS($this->_path.'views/js/ecstercheckout.js');
     }
 
-    public function postValidation()
+    /**
+     * Validate user input.
+     *
+     * 
+     * @return void
+     */
+    private function postValidation()
     {
         if (!Tools::getValue('ECSTER_USERNAME')) {
             $this->post_errors[] = $this->l('You need to provide Ecster username');
@@ -131,7 +137,13 @@ class Ecster extends PaymentModule
             $this->post_errors[] = $this->l('You need to provide Ecster ECP ID');
         }
     }
-    
+
+    /**
+     * getContent
+     * 
+     * 
+     * @return $html form
+     */
     public function getContent()
     {
         if (Tools::isSubmit('saveBtn')) {
@@ -149,7 +161,13 @@ class Ecster extends PaymentModule
         $this->html .= $this->renderForm();
         return $this->html;
     }
-
+    /**
+     * Build a ecster order.
+     *
+     * 
+     * @param  null|int $cartId use existing cart or new up one with cartId
+     * @return array ecster order data
+     */
     public function buildOrder($cartId = null)
     {
         if (is_null($cartId)) {
@@ -173,7 +191,7 @@ class Ecster extends PaymentModule
             'price' => (int)($shippingCost * 100),
             'selected' => true
         );
-        $create['cart']['amount'] = (int)($cart->getOrderTotal(true, Cart::ONLY_PRODUCTS) * 100);
+        $create['cart']['amount'] = (int)($cart->getOrderTotal(true, Cart::BOTH) * 100);
         $create['cart']['currency'] = $this->context->currency->iso_code;
         $create['cart']['message'] = null;
         $create['cart']['externalReference'] = (int)$this->context->cart->id;
@@ -184,7 +202,6 @@ class Ecster extends PaymentModule
             $price = (int)($price * 100);
             $tax_rate = $product['rate'] . "%";
             $checkoutcart[] = array(
-                'partNumber' => 'random',
                 'name' => $product['name'],
                 'description' => $product['reference'],
                 'quantity' => (int)$product['quantity'],
@@ -193,6 +210,21 @@ class Ecster extends PaymentModule
                 'vatCode' => $tax_rate,
                 'discount' => 0,
             );
+        }
+
+        $discounts = $cart->getCartRules();
+
+        if (count($discounts) > 0) {
+            foreach ($discounts as $discount) {
+                $price = $discount['value_real'];
+                $tax_discount = (int)round((($discount['value_real'] / $discount['value_tax_exc']) - 1.0) * 100);
+                $checkoutcart[] = array(
+                    'name' => $discount['name'],
+                    'quantity' => 1,
+                    'unitPrice' => -($price * 100),
+                    'vatCode' => (string)$tax_discount.'%'
+                ); 
+            }
         }
         
         foreach ($checkoutcart as $item) {
@@ -226,7 +258,11 @@ class Ecster extends PaymentModule
         $this->html .= $this->displayConfirmation($this->l('Settings updated'));
     }
 
-
+    /**
+     * Render the backoffice form
+     * 
+     * @return a tpl fetched
+     */
     public function renderForm()
     {
         $ecster_mode = array(
@@ -336,11 +372,15 @@ class Ecster extends PaymentModule
             
             return $this->display(__FILE__, 'ecstercheckout.tpl');
         } catch (Ecster_ApiErrorException $e) {
-            $this->context->cookie->__unset('ecster_cart_key');
+            Logger::addLog('Failed starting ecster with error message : '.$e->getMessage().' and error code :'.$e->getCode());
         }
     }
 
-
+    /**
+     * getConfigFieldsValues
+     * 
+     * @return array config values
+     */
     public function getConfigFieldsValues()
     {
         return array(
