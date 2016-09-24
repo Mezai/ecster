@@ -60,8 +60,5 @@
         onPaymentSuccess: function() {
 
         },
-        onPaymentFailure: function() {
-    		window.location = errorPage;
-    	},
     });
 </script>

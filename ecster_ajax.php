@@ -23,24 +23,22 @@
 *  @license   http://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
 *  International Registered Trademark & Property of PrestaShop SA
 */
+
 include(dirname(__FILE__).'/../../config/config.inc.php');
 include(dirname(__FILE__).'/../../init.php');
 header('Content-Type: application/json');
 
 if (Tools::getValue('cartKey') && Tools::getValue('cartId')) {
 	$ecster = Module::getInstanceByName('ecster');
-	//var_dump($ecster);
-	//exit;
 	try {
-			$input = file_get_contents('php://input');
-			parse_str($input, $output);
-			//var_dump($output);
+		$input = file_get_contents('php://input');
+		parse_str($input, $output);
 
-			$order = new EcsterOrder($ecster->config);
-			$cartKey = $order->update($ecster->buildOrder((int)$output['cartId']), $output['cartKey'])->getCartKey();
+		$order = new EcsterOrder($ecster->config);
+		$cartKey = $order->update($ecster->buildOrder((int)$output['cartId']), $output['cartKey'])->getCartKey();
 
-			echo json_encode(array('cartKey' => $cartKey));
-		} catch (Exception $e) {
-			Logger::addLog('Failed updating ecster cart with message : '.$e->getMessage());
-		}	
+		echo json_encode(array('cartKey' => $cartKey));
+	} catch (Exception $e) {
+		Logger::addLog('Failed updating ecster cart with message : '.$e->getMessage());
+	}	
 }
