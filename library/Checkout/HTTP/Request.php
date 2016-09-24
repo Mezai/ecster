@@ -77,7 +77,7 @@ class Ecster_Http_Request
      */
     public function setMethod($method)
     {
-        $this->method = strtoupper($method);
+        $this->method = Tools::strtoupper($method);
     }
 
     /**

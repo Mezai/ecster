@@ -48,12 +48,12 @@ class Ecster_CurlHeaders
         // Didn't find a colon.
         if ($pos === false) {
             // Not real header, abort.
-            return strlen($header);
+            return Tools::strlen($header);
         }
-        $key = substr($header, 0, $pos);
-        $value = trim(substr($header, $pos+1));
+        $key = Tools::substr($header, 0, $pos);
+        $value = trim(Tools::substr($header, $pos+1));
         $this->headers[$key] = trim($value);
-        return strlen($header);
+        return Tools::strlen($header);
     }
 
   /**

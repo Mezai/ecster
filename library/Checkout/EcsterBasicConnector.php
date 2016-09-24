@@ -81,7 +81,7 @@ class EcsterBasicConnector
     protected function verifyResponse(Ecster_HTTP_Response $response)
     {
         if ($response->getStatus() >= 400 && $response->getStatus() <= 599) {
-            $json = json_decode($response->getData(), true);
+            $json = Tools::jsonDecode($response->getData(), true);
             $payload = ($json && is_array($json)) ? $json : array();
             throw new Ecster_ApiErrorException(
                 'Api error', 20
@@ -107,7 +107,7 @@ class EcsterBasicConnector
             $resource->setLocation($url);
             break;
         case 200:
-            $json = json_decode($result->getData(), true);
+            $json = Tools::jsonDecode($result->getData(), true);
             if ($json === null) {
                 throw new Ecster_ConnectorErrorException(
                     'Bad format on response content.',
@@ -210,7 +210,7 @@ class EcsterBasicConnector
         $request->setHeader('X-Ecster-password', $this->password);
         $request->setHeader('Content-Type', $contentType);
 
-        if (strlen($payload) > 0) {
+        if (Tools::strlen($payload) > 0) {
             $request->setData($payload);
         }
 
@@ -238,7 +238,7 @@ class EcsterBasicConnector
 
         $payload = '';
         if ($method === 'POST' || $method === 'PUT') {
-            $payload = json_encode($this->getData($resource, $options));
+            $payload = Tools::jsonEncode($this->getData($resource, $options));
         }
 
         $request = $this->createRequest($resource, $method, $payload, $options);

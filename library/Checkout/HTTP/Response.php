@@ -71,7 +71,7 @@ class Ecster_HTTP_Response
         $this->request = $request;
         $this->headers = array();
         foreach ($headers as $key => $value) {
-            $this->headers[strtolower($key)] = $value;
+            $this->headers[Tools::strtolower($key)] = $value;
         }
         $this->status = $status;
         $this->data = $data;
@@ -127,7 +127,7 @@ class Ecster_HTTP_Response
      */
     public function getHeader($name)
     {
-        $name = strtolower($name);
+        $name = Tools::strtolower($name);
         if (!array_key_exists($name, $this->headers)) {
             return null;
         }
