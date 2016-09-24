@@ -25,23 +25,6 @@ class EcsterCallbackModuleFrontController extends ModuleFrontController
     private $ecsterCart;
     
     /**
-     * Set the state for a order.
-     *
-     * 
-     * @param string $state the state to set.
-     */
-    private function setState($state)
-    {
-        $orderId = Order::getOrderByCartId($this->ecsterCart->id);
-        $order = new Order($orderId);
-        if ($this->ecsterCart->OrderExists() && $order->getCurrentState() != constant($state)) {
-            $order->setCurrentState(constant($state));
-            header('HTTP/1.1 200 OK', true, 200);
-            exit;
-        }
-    }
-
-    /**
      * Check if a customer exists.
      *
      *
@@ -160,11 +143,13 @@ class EcsterCallbackModuleFrontController extends ModuleFrontController
         try {
             $input = Tools::jsonDecode(Tools::file_get_contents('php://input'), true);
             $internalReference = $input['internalReference'];
+            $externalReference = $input['externalReference'];
+            $status = $input['status'];
             $ecster_order = new EcsterOrder($this->module->config);
             $ecster = $ecster_order->fetch($internalReference)->getResponse();
-            $this->ecsterCart = new Cart((int)$input['externalReference']);
+            $this->ecsterCart = new Cart((int)$externalReference);
 
-            if (Tools::strtolower($input['status']) == "ready") {
+            if (Tools::strtolower() == "ready") {
                 if ($this->ecsterCart->OrderExists()) {
                     header('HTTP/1.1 200 OK', true, 200);
                     exit;
@@ -255,16 +240,6 @@ class EcsterCallbackModuleFrontController extends ModuleFrontController
                 
                 header('HTTP/1.1 200 OK', true, 200);
                 exit;
-
-                
-            }
-
-            if (Tools::strtolower($input['status']) == "fullydelivered") {
-                $this->setState('OrderState::FLAG_DELIVERY');
-            }
-
-            if (Tools::strtolower($input['status']) == "annuled") {
-                $this->setState('OrderState::FLAG_NO_HIDDEN');
             }
         } catch (Exception $e) {
             Logger::addLog('Ecster checkout callback error message: '.$e->getMessage().' and error code : '.$e->getCode());
