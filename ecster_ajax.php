@@ -29,16 +29,16 @@ include(dirname(__FILE__).'/../../init.php');
 header('Content-Type: application/json');
 
 if (Tools::getValue('cartKey') && Tools::getValue('cartId')) {
-	$ecster = Module::getInstanceByName('ecster');
-	try {
-		$input = Tools::file_get_contents('php://input');
-		parse_str($input, $output);
+    $ecster = Module::getInstanceByName('ecster');
+    try {
+        $input = Tools::file_get_contents('php://input');
+        parse_str($input, $output);
 
-		$order = new EcsterOrder($ecster->config);
-		$cartKey = $order->update($ecster->buildOrder((int)$output['cartId']), $output['cartKey'])->getCartKey();
+        $order = new EcsterOrder($ecster->config);
+        $cartKey = $order->update($ecster->buildOrder((int)$output['cartId']), $output['cartKey'])->getCartKey();
 
-		echo Tools::jsonEncode(array('cartKey' => $cartKey));
-	} catch (Exception $e) {
-		Logger::addLog('Failed updating ecster cart with message : '.$e->getMessage());
-	}	
+        echo Tools::jsonEncode(array('cartKey' => $cartKey));
+    } catch (Exception $e) {
+        Logger::addLog('Failed updating ecster cart with message : '.$e->getMessage());
+    }
 }

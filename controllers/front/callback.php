@@ -46,8 +46,9 @@ class EcsterCallbackModuleFrontController extends ModuleFrontController
      * @return bool customer exists or not.
      */
 
-    private function customerExists(array $ecster_customer) {
-    	return ($id_customer = (int)Customer::customerExists($ecster_customer['email'], true, false)) > 0 ? $id_customer : false;
+    private function customerExists(array $ecster_customer)
+    {
+        return ($id_customer = (int)Customer::customerExists($ecster_customer['email'], true, false)) > 0 ? $id_customer : false;
     }
 
     /**
@@ -59,22 +60,21 @@ class EcsterCallbackModuleFrontController extends ModuleFrontController
      */
 
     private function createCustomer(array $ecster_customer)
-    {        
-            $customer = new Customer();
-            $customer->firstname = $this->splitNames($ecster_customer, 'firstname');
-            $customer->lastname = $this->splitNames($ecster_customer, 'lastname');
-            $customer->email = $ecster_customer['email'];
-            $customer->passwd = Tools::passwdGen(8, 'ALPHANUMERIC');
-            $customer->is_guest = 1;
-            $customer->id_default_group = (int)Configuration::get('PS_GUEST_GROUP', null, $this->ecsterCart->id_shop);
-            $customer->newsletter = 0;
-            $customer->optin = 0;
-            $customer->active = 1;
-            $customer->id_gender = 0;
+    {
+        $customer = new Customer();
+        $customer->firstname = $this->splitNames($ecster_customer, 'firstname');
+        $customer->lastname = $this->splitNames($ecster_customer, 'lastname');
+        $customer->email = $ecster_customer['email'];
+        $customer->passwd = Tools::passwdGen(8, 'ALPHANUMERIC');
+        $customer->is_guest = 1;
+        $customer->id_default_group = (int)Configuration::get('PS_GUEST_GROUP', null, $this->ecsterCart->id_shop);
+        $customer->newsletter = 0;
+        $customer->optin = 0;
+        $customer->active = 1;
+        $customer->id_gender = 0;
 
-            $customer->add();
-            return $customer;
-
+        $customer->add();
+        return $customer;
     }
     /**
      * Split ecster names into given name and family name.
@@ -139,10 +139,10 @@ class EcsterCallbackModuleFrontController extends ModuleFrontController
         $addresses = $customer->getAddresses($this->ecsterCart->id_lang);
 
         foreach ($addresses as $key => $value) {
-           if ($addresses[$key]['firstname'] === $ecster_address['firstname'] && $addresses[$key]['lastname'] === $ecster_address['lastname'] && $addresses[$key]['address1'] === $ecster_address['address'] &&
-           		$addresses[$key]['city'] === $ecster_address['city'] && $addresses[$key]['postcode'] === $ecster_address['zip']) {
-           		return $addresses[$key]['id_address'];
-           }
+            if ($addresses[$key]['firstname'] === $ecster_address['firstname'] && $addresses[$key]['lastname'] === $ecster_address['lastname'] && $addresses[$key]['address1'] === $ecster_address['address'] &&
+                   $addresses[$key]['city'] === $ecster_address['city'] && $addresses[$key]['postcode'] === $ecster_address['zip']) {
+                return $addresses[$key]['id_address'];
+            }
         }
         return false;
     }
@@ -171,47 +171,44 @@ class EcsterCallbackModuleFrontController extends ModuleFrontController
 
                 $ecsterOrder = $ecster['order'];
                 if ($id_customer = $this->customerExists($ecster['customer'])) {
-                		$customer = new Customer($id_customer);
+                    $customer = new Customer($id_customer);
                 } else {
-                		$customer = $this->createCustomer($ecster['customer']);
+                    $customer = $this->createCustomer($ecster['customer']);
                 }
 
-                if ($ecsterOrder['idMethod'] === 'BANKID' || $ecsterOrder['idMethod'] === 'BANKID_MOBILE') 
-                	if (array_key_exists('recipient', $ecster)) {
-
-                		if ($id_address = $this->checkIfAddressExists($customer, $ecster['customer'])) {
-                			$this->ecsterCart->id_address_invoice = $id_address;
-                		} else {
-                			$this->createAddress($customer, $ecster['customer'], 'invoice');
-                		}
-                		if ($id_address = $this->checkIfAddressExists($customer, $ecster['recipient'])) {
-                			$this->ecsterCart->id_address_delivery = $id_address;
-                		} else {
-                			$this->createAddress($customer, $ecster['recipient'], 'shipping');
-                		}
-
-                	} else {
-                		
-                		if ($id_address = $this->checkIfAddressExists($customer, $ecster['customer'])) {
-                			Logger::addLog('id address: '.$id_address);
-                			$this->ecsterCart->id_address_delivery = $id_address;
-                			$this->ecsterCart->id_address_invoice = $id_address;
-
-                		} else {
-                			Logger::addLog('creating new address');
-                			$this->createAddress($customer, $ecster['customer'], 'invoice');
-                			$this->createAddress($customer, $ecster['customer'], 'shipping');
-                		}
-                	}
+                if ($ecsterOrder['idMethod'] === 'BANKID' || $ecsterOrder['idMethod'] === 'BANKID_MOBILE') {
+                    if (array_key_exists('recipient', $ecster)) {
+                        if ($id_address = $this->checkIfAddressExists($customer, $ecster['customer'])) {
+                            $this->ecsterCart->id_address_invoice = $id_address;
+                        } else {
+                            $this->createAddress($customer, $ecster['customer'], 'invoice');
+                        }
+                        if ($id_address = $this->checkIfAddressExists($customer, $ecster['recipient'])) {
+                            $this->ecsterCart->id_address_delivery = $id_address;
+                        } else {
+                            $this->createAddress($customer, $ecster['recipient'], 'shipping');
+                        }
+                    } else {
+                        if ($id_address = $this->checkIfAddressExists($customer, $ecster['customer'])) {
+                            Logger::addLog('id address: '.$id_address);
+                            $this->ecsterCart->id_address_delivery = $id_address;
+                            $this->ecsterCart->id_address_invoice = $id_address;
+                        } else {
+                            Logger::addLog('creating new address');
+                            $this->createAddress($customer, $ecster['customer'], 'invoice');
+                            $this->createAddress($customer, $ecster['customer'], 'shipping');
+                        }
+                    }
+                }
 
                 if ($ecster['idMethod'] === 'NAME') {
-                	if ($id_address = $this->checkIfAddressExists($customer, $ecster['recipient'])) {
-                		$this->ecsterCart->id_address_delivery = $id_address;
-                		$this->ecsterCart->id_address_invoice = $id_address;
-                	} else {
-                		$this->createAddress($customer, $ecster['recipient'], 'invoice');
-                		$this->createAddress($customer, $ecster['recipient'], 'shipping');
-                	}
+                    if ($id_address = $this->checkIfAddressExists($customer, $ecster['recipient'])) {
+                        $this->ecsterCart->id_address_delivery = $id_address;
+                        $this->ecsterCart->id_address_invoice = $id_address;
+                    } else {
+                        $this->createAddress($customer, $ecster['recipient'], 'invoice');
+                        $this->createAddress($customer, $ecster['recipient'], 'shipping');
+                    }
                 }
 
                 $new_delivery_options = array();

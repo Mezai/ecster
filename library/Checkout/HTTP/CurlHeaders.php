@@ -27,7 +27,7 @@
 class Ecster_CurlHeaders
 {
 
-  /**
+    /**
    * Curl headers.
    *
    * @var array

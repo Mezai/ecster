@@ -27,7 +27,7 @@
 require_once(dirname(__FILE__).'/library/EcsterCheckout.php');
 require_once(dirname(__FILE__).'/models/EcsterOrderModel.php');
 
-class Ecster extends PaymentModule
+class ecster extends PaymentModule
 {
     private $html = '';
     private $post_errors = array();
@@ -67,7 +67,7 @@ class Ecster extends PaymentModule
      * @return bool
      */
     public function install()
-    {   
+    {
         return parent::install()
             && $this->registerHook('displayShoppingCart')
             && $this->registerHook('backOfficeHeader')
@@ -101,12 +101,12 @@ class Ecster extends PaymentModule
     public function hookHeader()
     {
         if (Configuration::get('ECSTER_MODE') == 'live') {
-        	$this->context->controller->addJS(
-        		'https://secure.ecster.se/pay/integration/ecster-pay.js'
-        	);
+            $this->context->controller->addJS(
+                'https://secure.ecster.se/pay/integration/ecster-pay.js'
+            );
         } else {
-        	$this->context->controller->addJS('https://labs.ecster.se/pay/integration/ecster-pay-labs.js'
-        	);
+            $this->context->controller->addJS('https://labs.ecster.se/pay/integration/ecster-pay-labs.js'
+            );
         }
       
 
@@ -179,7 +179,7 @@ class Ecster extends PaymentModule
         );
         $products = $cart->getProducts();
         $carrier = new Carrier($cart->id_carrier, $this->context->language->id);
-        $shippingCost = $cart->getCarrierCost($carrier->id); 
+        $shippingCost = $cart->getCarrierCost($carrier->id);
         $create['deliveryMethods'][] = array(
             'id' => $carrier->id_reference,
             'name' => $carrier->name,
@@ -219,7 +219,7 @@ class Ecster extends PaymentModule
                     'quantity' => 1,
                     'unitPrice' => -($price * 100),
                     'vatCode' => (string)$tax_discount.'%'
-                ); 
+                );
             }
         }
         
@@ -353,7 +353,7 @@ class Ecster extends PaymentModule
         try {
             $order = new EcsterOrder($this->config);
        
-        	$cartKey = $order->create($this->buildOrder())->getCartKey();
+            $cartKey = $order->create($this->buildOrder())->getCartKey();
             
             $is_ssl = Tools::usingSecureMode();
             $cms = new CMS((int)Configuration::get('PS_CONDITIONS_CMS_ID'), (int)$this->context->cookie->id_lang);
